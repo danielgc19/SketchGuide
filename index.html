@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SketchGuide</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#f3f4f6;--pan:#fff;--ink:#1d2127;--mute:#5d6672;--line:#d3d8de;--acc:#2458d6;--aci:#fff;--stage:#cfd3d9;color-scheme:light;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14171a;--pan:#1e2226;--ink:#e8ebee;--mute:#9aa4af;--line:#323941;--acc:#6b9bff;--aci:#0d1522;--stage:#0e1012;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#14171a;--pan:#1e2226;--ink:#e8ebee;--mute:#9aa4af;--line:#323941;--acc:#6b9bff;--aci:#0d1522;--stage:#0e1012;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{display:flex;flex-direction:column;background:var(--bg);color:var(--ink);font:500 13.5px/1.3 Figtree,system-ui,-apple-system,"Segoe UI",sans-serif;overflow:hidden}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;padding:7px 12px;background:var(--pan);border-bottom:1px solid var(--line)}
+.logo{font-weight:600;font-size:16px;margin-right:10px;display:flex;align-items:center;gap:7px}
+.logo i{width:16px;height:16px;border:2px solid var(--ink);border-radius:3px;position:relative;display:inline-block}
+.logo i:before,.logo i:after{content:"";position:absolute;background:var(--acc)}
+.logo i:before{left:50%;top:-2px;bottom:-2px;width:2px;margin-left:-1px}
+.logo i:after{top:50%;left:-2px;right:-2px;height:2px;margin-top:-1px}
+.sp{flex:1}
+button,select,input[type=number]{font:inherit;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:6px;padding:5px 10px;min-height:30px}
+button{cursor:pointer}
+button:hover:not(:disabled){border-color:var(--mute)}
+button:disabled{opacity:.4;cursor:default}
+select{background:var(--pan)}
+.primary{background:var(--acc);color:var(--aci);border-color:var(--acc)}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.app{flex:1;display:grid;grid-template-columns:1fr 292px;min-height:0}
+.nopanel .app{grid-template-columns:1fr}.nopanel aside{display:none}
+#stage{position:relative;overflow:hidden;background:var(--stage);touch-action:none;cursor:grab;min-height:0}
+#stage.over{outline:2px dashed var(--acc);outline-offset:-10px}
+#world{position:absolute;left:0;top:0;transform-origin:0 0;display:none;background:#fff;box-shadow:0 2px 14px rgba(0,0,0,.3)}
+#flip{position:absolute;inset:0}
+#flip>*{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
+#im{-webkit-user-drag:none;user-select:none}
+#gd{pointer-events:none;overflow:hidden}
+#dv{width:2px;height:100%;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.55);display:none;pointer-events:none}
+#empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:24px}
+#empty h1{margin:0;font-size:20px;font-weight:600}
+#empty p{margin:0;color:var(--mute);max-width:36ch}
+.zc{position:absolute;right:12px;bottom:12px;display:flex;align-items:center;gap:4px;background:var(--pan);border:1px solid var(--line);border-radius:8px;padding:4px}
+.zc button{border:0;min-width:30px}#zp{min-width:46px;text-align:center;color:var(--mute);font-variant-numeric:tabular-nums}
+#info{position:absolute;left:12px;bottom:12px;background:var(--pan);border:1px solid var(--line);border-radius:8px;padding:6px 10px;color:var(--mute);display:none;max-width:60%}
+#msg{position:absolute;left:50%;top:14px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:6px;display:none;max-width:90%;z-index:3}
+aside{background:var(--pan);border-left:1px solid var(--line);overflow-y:auto;padding:12px 14px}
+aside section{padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--line)}
+aside section:last-child{border:0;margin:0}
+h2{font-size:13px;font-weight:600;margin:0 0 9px}
+.r{display:flex;align-items:center;gap:8px;margin:7px 0;color:var(--mute)}
+.r>span{flex:0 0 112px}.r input[type=range]{flex:1;min-width:0;accent-color:var(--acc)}.r select{flex:1}
+.r input[type=number]{width:70px}
+.seg{display:flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg label{flex:1;text-align:center;padding:6px 4px;cursor:pointer;color:var(--mute)}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label:has(input:checked){background:var(--acc);color:var(--aci)}
+.seg label:has(input:focus-visible){outline:2px solid var(--acc);outline-offset:-2px}
+.ck{display:flex;align-items:center;gap:7px;margin:7px 0;cursor:pointer}
+.ck input{accent-color:var(--acc);width:15px;height:15px}
+input[type=color]{width:38px;height:28px;padding:1px;border:1px solid var(--line);border-radius:6px;background:transparent}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+dialog{background:var(--pan);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:16px;width:min(760px,94vw)}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+#pv{display:block;max-width:100%;max-height:48vh;margin:10px auto;background:#fff;border:1px solid var(--line)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+#pr{display:none}
+@media (max-width:820px){.app{grid-template-columns:1fr;grid-template-rows:1fr minmax(0,42vh)}aside{border-left:0;border-top:1px solid var(--line)}.nopanel .app{grid-template-rows:1fr}.r>span{flex-basis:100px}}
+@media print{html,body{height:auto;overflow:visible;background:#fff}body>*:not(#pr){display:none!important}#pr{display:block}#pr img{display:block;max-width:100%;max-height:96vh;margin:0 auto}}
+</style>
+<style id="pgs"></style>
+</head>
+<body>
+<header>
+  <div class="logo"><i></i>SketchGuide</div>
+  <button class="primary" id="up" type="button">Cargar imagen</button>
+  <input class="sr" id="file" type="file" accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp" tabindex="-1">
+  <button id="rst" type="button" disabled>Deshacer ajustes</button>
+  <span class="sp"></span>
+  <button id="tp" type="button" aria-pressed="true">Panel</button>
+  <button id="fs" type="button">Pantalla completa</button>
+  <button id="th" type="button">Tema</button>
+  <button class="primary" id="ex" type="button" disabled>Exportar</button>
+</header>
+<div class="app">
+<main id="stage">
+  <div id="empty"><h1>Sube un dibujo o una foto</h1><p>Arrastra una imagen aquí o elige un archivo PNG, JPG o WEBP. Todo se procesa en tu navegador.</p><button class="primary" id="up2" type="button">Elegir imagen</button></div>
+  <div id="world"><div id="flip"><img id="im" alt="Imagen original" draggable="false"><canvas id="sk"></canvas><svg id="gd" aria-hidden="true"></svg><div id="dv"></div></div></div>
+  <div id="info"></div>
+  <div class="zc"><button id="zo" type="button" aria-label="Alejar">−</button><span id="zp">100%</span><button id="zi" type="button" aria-label="Acercar">+</button><button id="zf" type="button">Ajustar</button></div>
+  <div id="msg" role="status"></div>
+</main>
+<aside id="pn">
+  <section><h2>Vista</h2>
+    <div class="seg" role="radiogroup" aria-label="Vista">
+      <label><input type="radio" name="v" value="orig">Original</label>
+      <label><input type="radio" name="v" value="sk" checked>Boceto</label>
+      <label><input type="radio" name="v" value="cmp">Comparar</label>
+    </div>
+    <label class="r"><span>Divisor</span><input type="range" id="cmp" min="0" max="100" value="50"></label>
+    <label class="ck"><input type="checkbox" id="flp"> Invertir horizontalmente</label>
+  </section>
+  <section id="adj"><h2>Boceto a lápiz</h2>
+    <label class="r"><span>Modo</span><select id="mode"><option value="realista">Lápiz realista</option><option value="lineal">Dibujo lineal</option><option value="suave">Boceto suave</option><option value="alto">Alto contraste</option></select></label>
+    <div id="sls"></div>
+  </section>
+  <section><h2>Guías</h2>
+    <label class="ck"><input type="checkbox" id="gs" checked> Mostrar guías</label>
+    <label class="r"><span>Sistema</span><select id="gy"><option value="cross">Cruz central</option><option value="g3">Cuadrícula 3 × 3</option><option value="g4">Cuadrícula 4 × 4</option><option value="g5">Cuadrícula 5 × 5</option></select></label>
+    <label class="ck"><input type="checkbox" id="gc"> Añadir cruz central a la cuadrícula</label>
+    <div class="r"><span>Color</span><input type="color" id="gcol" value="#ff2d78" aria-label="Color de las guías"></div>
+    <label class="r"><span>Grosor</span><input type="range" id="gt" min="1" max="12" step="0.5" value="3"></label>
+    <label class="r"><span>Opacidad</span><input type="range" id="go" min="10" max="100" value="85"></label>
+    <div class="r"><span>Cruz: X / Y (%)</span><input type="number" id="gx" min="0" max="100" step="0.1" value="50" aria-label="Posición X en porcentaje"><input type="number" id="gv" min="0" max="100" step="0.1" value="50" aria-label="Posición Y en porcentaje"></div>
+    <div class="row"><button id="gcn" type="button">Centrar</button><label class="ck" style="margin:0"><input type="checkbox" id="gl"> Bloquear</label></div>
+  </section>
+</aside>
+</div>
+
+<dialog id="dlg">
+  <h2>Exportar</h2>
+  <div class="row"><select id="ek" aria-label="Qué exportar"><option value="orig">Imagen original</option><option value="sk">Boceto limpio</option><option value="skG">Boceto con guías</option><option value="origG">Original con guías</option></select>
+  <label class="ck" style="margin:0"><input type="checkbox" id="wbg"> Fondo blanco en transparencias</label></div>
+  <canvas id="pv"></canvas><p id="pvi" style="color:var(--mute);margin:0 0 10px"></p>
+  <div class="row"><select id="pz" aria-label="Papel"><option value="A4">A4</option><option value="A3">A3</option><option value="letter">Carta</option></select><button id="prt" type="button">Imprimir ajustado a la página</button><span class="sp"></span><button id="cl" type="button">Cerrar</button><button class="primary" id="dl" type="button">Descargar</button></div>
+</dialog>
+<div id="pr"></div>
+
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+var SL=[['intensity','Intensidad',20,150,100],['detail','Detalle',0,100,50],['shadows','Sombras',0,100,40],['contrast','Contraste',-60,100,0],['brightness','Brillo',-50,50,0],['sharp','Nitidez',0,100,20],['paper','Blancura del papel',0,100,50]];
+$('sls').innerHTML=SL.map(function(s){return '<label class="r"><span>'+s[1]+'</span><input type="range" id="'+s[0]+'" min="'+s[2]+'" max="'+s[3]+'" value="'+s[4]+'"></label>'}).join('');
+
+var stage=$('stage'),world=$('world'),im=$('im'),sk=$('sk'),gd=$('gd');
+var file=null,url=null,W=0,H=0,pw=0,ph=0,gs=null,s=1,tx=0,ty=0,fit=1,moved=false,ex=null,ptrs=new Map(),pinch=0;
+
+function msg(t){var m=$('msg');m.textContent=t;m.style.display='block';clearTimeout(msg.t);msg.t=setTimeout(function(){m.style.display='none'},5000)}
+
+/* ===== Procesamiento: boceto a lápiz (dodge de color + desenfoque gaussiano aproximado) ===== */
+function pass(a,d,w,h,r,hz){
+  var n=hz?w:h,m=hz?h:w,st=hz?1:w,ln=hz?w:1,k=1/(2*r+1),i,j,o,acc;
+  for(j=0;j<m;j++){o=j*ln;acc=0;
+    for(i=-r;i<=r;i++)acc+=a[o+Math.min(n-1,Math.max(0,i))*st];
+    for(i=0;i<n;i++){d[o+i*st]=acc*k;acc+=a[o+Math.min(n-1,i+r+1)*st]-a[o+Math.max(0,i-r)*st]}}
+}
+function blur(a,w,h,r){
+  var pr=Math.max(1,Math.round(r/1.7)),b=Float32Array.from(a),t=new Float32Array(a.length);
+  for(var i=0;i<3;i++){pass(b,t,w,h,pr,1);pass(t,b,w,h,pr,0)}
+  return b;
+}
+function gray(id){
+  var d=id.data,N=d.length/4,g=new Float32Array(N),i,a;
+  for(i=0;i<N;i++){a=d[i*4+3]/255;g[i]=(.299*d[i*4]+.587*d[i*4+1]+.114*d[i*4+2])*a+255*(1-a)}
+  return g;
+}
+function sketch(g,w,h,p,sc){
+  var N=w*h,i,inv=new Float32Array(N),m=p.mode,k=m==='lineal'?.4:m==='suave'?1.3:1;
+  for(i=0;i<N;i++)inv[i]=255-g[i];
+  var bl=blur(inv,w,h,(2+(100-p.detail)*.25)*sc*k),o=new Float32Array(N),sh=p.shadows/100,ik=p.intensity/100,ck=1+p.contrast/100,wp=255/(255-p.paper*.25);
+  for(i=0;i<N;i++){
+    var gv=g[i],d=Math.min(255,gv*255/Math.max(1,255-bl[i])),t=1-gv/255,v;
+    if(m==='realista')v=d*(1-sh*.55*t);
+    else if(m==='lineal')v=(d-140)*2.55;
+    else if(m==='suave'){v=255-(255-d)*.55;v*=1-sh*.15*t}
+    else{v=(d-90)*1.96;v*=1-sh*.8*t}
+    v=Math.min(255,Math.max(0,v));
+    v=255-(255-v)*ik;
+    v=((v-128)*ck+128+p.brightness*1.2)*wp;
+    o[i]=Math.min(255,Math.max(0,v));
+  }
+  if(p.sharp>0){var b2=blur(o,w,h,Math.max(1.7,1.6*sc)),a=p.sharp/100*1.5,q;
+    for(i=0;i<N;i++){q=o[i]+a*(o[i]-b2[i]);o[i]=q<0?0:q>255?255:q}}
+  return o;
+}
+function toImg(o,w,h){
+  var id=new ImageData(w,h),d=id.data,i,j;
+  for(i=0;i<o.length;i++){j=i*4;d[j]=d[j+1]=d[j+2]=o[i];d[j+3]=255}
+  return id;
+}
+function par(){var p={mode:$('mode').value};SL.forEach(function(x){p[x[0]]=+$(x[0]).value});return p}
+
+/* vista previa: se procesa una copia reducida; la imagen original no se toca */
+var pend=false;
+function sched(){if(!pend&&gs){pend=true;requestAnimationFrame(function(){pend=false;
+  var o=sketch(gs,pw,ph,par(),Math.max(pw,ph)/1000);
+  sk.width=pw;sk.height=ph;sk.getContext('2d').putImageData(toImg(o,pw,ph),0,0)})}}
+
+/* ===== Carga ===== */
+function load(f){
+  if(!f)return;
+  if(!(/^image\/(png|jpeg|webp)$/.test(f.type)||/\.(png|jpe?g|webp)$/i.test(f.name))){msg('Formato no admitido. Usa PNG, JPG, JPEG o WEBP.');return}
+  if(f.size>40*1048576){msg('El archivo supera los 40 MB. Usa una imagen más ligera.');return}
+  var u=URL.createObjectURL(f),t=new Image();
+  t.onload=function(){
+    var w=t.naturalWidth,h=t.naturalHeight;
+    if(w*h>60e6){URL.revokeObjectURL(u);msg('La imagen tiene más de 60 megapíxeles; es demasiado grande para procesarla aquí.');return}
+    if(url)URL.revokeObjectURL(url);
+    file=f;url=u;W=w;H=h;im.src=u;
+    var k=Math.min(1,1400/Math.max(W,H));pw=Math.max(1,Math.round(W*k));ph=Math.max(1,Math.round(H*k));
+    var c=document.createElement('canvas');c.width=pw;c.height=ph;var x=c.getContext('2d');
+    x.fillStyle='#fff';x.fillRect(0,0,pw,ph);x.drawImage(t,0,0,pw,ph);
+    gs=gray(x.getImageData(0,0,pw,ph));
+    world.style.width=W+'px';world.style.height=H+'px';world.style.display='block';$('empty').style.display='none';
+    $('info').style.display='block';$('info').textContent=f.name+' · '+W+' × '+H+' px';
+    ['rst','ex'].forEach(function(i){$(i).disabled=false});
+    upd();sched();fitView();
+  };
+  t.onerror=function(){URL.revokeObjectURL(u);msg('No se pudo leer la imagen: el archivo puede estar dañado.')};
+  t.src=u;
+}
+
+/* ===== Guías: una sola función de segmentos para pantalla y exportación (coordenadas originales) ===== */
+function lines(){
+  var g=$('gy').value,L=[],x=+$('gx').value/100*W,y=+$('gv').value/100*H,i,n;
+  if(g!=='cross'){n=+g.slice(1);for(i=1;i<n;i++){L.push([W*i/n,0,W*i/n,H],[0,H*i/n,W,H*i/n])}}
+  if(g==='cross'||$('gc').checked)L.push([x,0,x,H],[0,y,W,y]);
+  return L;
+}
+function lw(){return Math.max(1,+$('gt').value*Math.max(W,H)/1000)}
+function drawGd(){
+  if(!W)return;
+  gd.setAttribute('viewBox','0 0 '+W+' '+H);gd.setAttribute('preserveAspectRatio','none');
+  gd.innerHTML='<g stroke="'+$('gcol').value+'" stroke-opacity="'+$('go').value/100+'" stroke-width="'+lw()+'">'+
+    lines().map(function(l){return '<line x1="'+l[0]+'" y1="'+l[1]+'" x2="'+l[2]+'" y2="'+l[3]+'"/>'}).join('')+'</g>';
+  gd.style.display=$('gs').checked?'':'none';
+}
+function paintG(x){
+  x.save();x.globalAlpha=$('go').value/100;x.strokeStyle=$('gcol').value;x.lineWidth=lw();x.beginPath();
+  lines().forEach(function(l){x.moveTo(l[0],l[1]);x.lineTo(l[2],l[3])});x.stroke();x.restore();
+}
+
+/* ===== Vista ===== */
+function upd(){
+  var v=document.querySelector('input[name=v]:checked').value,p=+$('cmp').value;
+  sk.style.display=v==='orig'?'none':'';
+  sk.style.clipPath=v==='cmp'?'inset(0 0 0 '+p+'%)':'none';
+  $('dv').style.display=v==='cmp'?'block':'none';
+  $('dv').style.left=p+'%';$('dv').style.width=Math.max(2,Math.max(W,H)/700)+'px';
+  $('cmp').disabled=v!=='cmp';
+  $('flip').style.transform=$('flp').checked?'scaleX(-1)':'';
+  var lk=$('gl').checked;$('gx').disabled=$('gv').disabled=$('gcn').disabled=lk;
+  drawGd();
+}
+function apply(){world.style.transform='translate('+tx+'px,'+ty+'px) scale('+s+')';$('zp').textContent=Math.round(s*100)+'%'}
+function fitView(){
+  if(!W)return;var r=stage.getBoundingClientRect();
+  fit=Math.min(Math.max(r.width-32,50)/W,Math.max(r.height-32,50)/H);
+  s=fit;tx=(r.width-W*s)/2;ty=(r.height-H*s)/2;moved=false;apply();
+}
+function zoomAt(cx,cy,k){var n=Math.min(Math.max(s*k,fit*.2),48);k=n/s;tx=cx-(cx-tx)*k;ty=cy-(cy-ty)*k;s=n;moved=true;apply()}
+function ctr(){var r=stage.getBoundingClientRect();return[r.width/2,r.height/2]}
+stage.addEventListener('wheel',function(e){if(!W)return;e.preventDefault();var r=stage.getBoundingClientRect();zoomAt(e.clientX-r.left,e.clientY-r.top,Math.exp(-e.deltaY*(e.ctrlKey?.01:.0015)))},{passive:false});
+stage.addEventListener('pointerdown',function(e){if(!W||e.target.closest('.zc'))return;stage.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});pinch=0});
+stage.addEventListener('pointermove',function(e){
+  var p=ptrs.get(e.pointerId);if(!p)return;
+  if(ptrs.size===1){tx+=e.clientX-p.x;ty+=e.clientY-p.y;moved=true;apply()}
+  p.x=e.clientX;p.y=e.clientY;
+  if(ptrs.size===2){var a=Array.from(ptrs.values()),d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y),r=stage.getBoundingClientRect();
+    if(pinch)zoomAt((a[0].x+a[1].x)/2-r.left,(a[0].y+a[1].y)/2-r.top,d/pinch);pinch=d}
+});
+function up(e){ptrs.delete(e.pointerId);pinch=0}
+stage.addEventListener('pointerup',up);stage.addEventListener('pointercancel',up);
+window.addEventListener('resize',function(){if(W&&!moved)fitView()});
+$('zi').onclick=function(){var c=ctr();zoomAt(c[0],c[1],1.25)};
+$('zo').onclick=function(){var c=ctr();zoomAt(c[0],c[1],.8)};
+$('zf').onclick=fitView;
+
+/* ===== Controles ===== */
+function pick(){$('file').click()}
+$('up').onclick=pick;$('up2').onclick=pick;
+$('file').onchange=function(e){load(e.target.files[0]);e.target.value=''};
+$('pn').addEventListener('input',function(e){upd();if(e.target.closest('#adj'))sched()});
+$('pn').addEventListener('change',upd);
+$('gcn').onclick=function(){$('gx').value=50;$('gv').value=50;upd()};
+$('rst').onclick=function(){SL.forEach(function(x){$(x[0]).value=x[4]});$('mode').value='realista';sched()};
+$('tp').onclick=function(){var h=document.body.classList.toggle('nopanel');this.setAttribute('aria-pressed',!h);setTimeout(function(){if(!moved)fitView()},30)};
+$('fs').onclick=function(){var d=document;try{if(d.fullscreenElement)d.exitFullscreen();else d.documentElement.requestFullscreen()}catch(e){msg('Tu navegador no permite pantalla completa aquí.')}};
+$('th').onclick=function(){var r=document.documentElement,dk=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme:dark)').matches;r.dataset.theme=dk?'light':'dark'};
+stage.addEventListener('dragover',function(e){e.preventDefault();stage.classList.add('over')});
+stage.addEventListener('dragleave',function(){stage.classList.remove('over')});
+stage.addEventListener('drop',function(e){e.preventDefault();stage.classList.remove('over');if(e.dataTransfer.files.length)load(e.dataTransfer.files[0])});
+document.addEventListener('keydown',function(e){if(!W||e.ctrlKey||e.metaKey||e.altKey||/INPUT|SELECT/.test(e.target.tagName)&&e.target.type!=='checkbox'&&e.target.type!=='radio')return;
+  if(e.key==='g'||e.key==='G'){$('gs').checked=!$('gs').checked;upd()}else if(e.key==='0')fitView()});
+
+/* ===== Exportación a resolución original ===== */
+function save(h,n){var a=document.createElement('a');a.href=h;a.download=n;document.body.appendChild(a);a.click();a.remove()}
+function build(k){
+  var c=document.createElement('canvas');c.width=W;c.height=H;var x=c.getContext('2d');
+  if($('wbg').checked||k==='sk'||k==='skG'){x.fillStyle='#fff';x.fillRect(0,0,W,H)}
+  x.drawImage(im,0,0,W,H);
+  if(k==='sk'||k==='skG'){x.putImageData(toImg(sketch(gray(x.getImageData(0,0,W,H)),W,H,par(),Math.max(W,H)/1000),W,H),0,0)}
+  if(k==='origG'||k==='skG')paintG(x);
+  return c;
+}
+function refresh(){
+  $('pvi').textContent='Procesando…';ex=null;
+  setTimeout(function(){
+    try{
+      var k=$('ek').value;ex=build(k);
+      var z=Math.min(1,700/Math.max(W,H)),c=$('pv');c.width=Math.round(W*z);c.height=Math.round(H*z);
+      c.getContext('2d').drawImage(ex,0,0,c.width,c.height);
+      $('pvi').textContent=W+' × '+H+' px · '+(k==='orig'&&!$('wbg').checked?'se descargará el archivo original sin cambios':'PNG; el formato de origen puede perder metadatos (EXIF) o la compresión original');
+    }catch(e){ex=null;$('pvi').textContent='No se pudo generar la imagen: es demasiado grande para la memoria de este navegador.'}
+  },30);
+}
+$('ex').onclick=function(){$('dlg').showModal();refresh()};
+$('ek').onchange=refresh;$('wbg').onchange=refresh;$('cl').onclick=function(){$('dlg').close();ex=null};
+function nm(){var b=file.name.replace(/\.[^.]+$/,''),k=$('ek').value;return b+({orig:'-original',sk:'-boceto',skG:'-boceto-guias',origG:'-original-guias'})[k]+'.png'}
+$('dl').onclick=function(){
+  if($('ek').value==='orig'&&!$('wbg').checked){save(url,file.name);return}
+  if(!ex)return;ex.toBlob(function(b){if(!b){msg('No se pudo crear el archivo.');return}var u=URL.createObjectURL(b);save(u,nm());setTimeout(function(){URL.revokeObjectURL(u)},4000)},'image/png');
+};
+$('prt').onclick=function(){
+  if(!ex)return;
+  ex.toBlob(function(b){
+    var u=URL.createObjectURL(b),i=new Image();
+    $('pgs').textContent='@page{size:'+$('pz').value+' '+(W>H?'landscape':'portrait')+';margin:10mm}';
+    i.onload=function(){$('pr').innerHTML='';$('pr').appendChild(i);window.print();setTimeout(function(){URL.revokeObjectURL(u)},4000)};
+    i.src=u;
+  },'image/png');
+};
+upd();
+})();
+</script>
+</body>
+</html>
